@@ -1,57 +1,27 @@
-rule = [["~Man(x)", "Mortal(x)"]]
+def negate(lit):
+    return lit[1:] if lit.startswith("~") else "~" + lit
 
-
-facts = ["Man(Socrates)"]
-
-
-goal = "Mortal(Socrates)"
-
-
-negated_goal = "~Mortal(Socrates)"
-
-
-clauses = rule[0] + [negated_goal] + facts
-
-
-def resolve(clause1, clause2):
-    for c1 in clause1:
-        for c2 in clause2:
-            if c1 == negate(c2):
-                new_clause = list(set(clause1 + clause2))
-                new_clause.remove(c1)
-                new_clause.remove(c2)
-                return new_clause
+def resolve(c1, c2):
+    for a in c1:
+        for b in c2:
+            if a == negate(b):
+                return list(set(c1 + c2) - {a, b})
     return None
 
-def negate(literal):
-    if literal.startswith("~"):
-        return literal[1:]
-    else:
-        return "~" + literal
-
-
 def unify(clause):
-    unified = []
-    for lit in clause:
-        unified.append(lit.replace("x", "Socrates"))
-    return unified
+    return [lit.replace("x", "Socrates")
+             for lit in clause]
 
+rules = [["~Man(x)", "Mortal(x)"]]
+facts = ["Man(Socrates)"]
+goal = "Mortal(Socrates)"
+neg_goal = "~Mortal(Socrates)"
 
-rule_clause = unify(rule[0])
-goal_clause = [negated_goal]
-fact_clause = facts
+r = unify(rules[0])
+step1 = resolve(r, facts)
+print("Step 1:", step1)
 
+step2 = resolve(step1, [neg_goal])
+print("Step 2:", step2)
 
-step1 = resolve(rule_clause, fact_clause)
-print("Step 1 Resolution:", step1)
-
-step2 = resolve(step1, goal_clause)
-print("Step 2 Resolution (goal):", step2)
-
-if step2 == []:
-    print("\n Goal Proven by Resolution!")
-else:
-    print("\nGoal Not Proven")
-
-
-
+print("\nGoal Proven!" if step2 == [] else "\nGoal Not Proven")
